@@ -71,6 +71,10 @@ const PokemonByNamePage: NextPage<Props> = ({ pokemon }) => {
               css={{
                 display: "flex",
                 justifyContent: "space-between",
+                flexDirection: "column",
+                "@sm": {
+                  flexDirection: "row",
+                },
               }}
             >
               <Text h1 transform="capitalize">
@@ -128,16 +132,25 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
     paths: pokemons.results.map(({ name }) => ({
       params: { name },
     })),
-    fallback: false,
+    fallback: "blocking",
   };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-    const { name } = params as { name: string };
-    const pokemon = await getPokemonInfo(name)
+  const { name } = params as { name: string };
+  const pokemon = await getPokemonInfo(name);
+
+  if (!pokemon) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
   return {
     props: {
-      pokemon
+      pokemon,
     },
   };
 };

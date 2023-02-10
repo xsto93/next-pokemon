@@ -5,9 +5,9 @@ import { Button, Card, Container, Grid, Image, Text } from "@nextui-org/react";
 import confetti from 'canvas-confetti';
 
 import { Layout } from "@/components/layouts";
-import pokeApi from "@/api/pokeApi";
 import { Pokemon } from "@/interfaces";
 import { getPokemonInfo, localFavorites } from "@/utils";
+
 
 interface Props {
   pokemon: Pokemon;
@@ -70,6 +70,10 @@ const PokemonPage: NextPage<Props> = ({ pokemon }) => {
               css={{
                 display: "flex",
                 justifyContent: "space-between",
+                flexDirection: "column",
+                "@sm": {
+                  flexDirection: "row",
+                },
               }}
             >
               <Text h1 transform="capitalize">
@@ -125,7 +129,7 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
     paths: pokemons151.map((id) => ({
       params: { id },
     })),
-    fallback: false,
+    fallback: 'blocking',
   };
 };
 
@@ -133,10 +137,20 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { id } = params as { id: string };
   const pokemon = await getPokemonInfo(id);
 
+  if(!pokemon) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false
+      }
+    }
+  }
+
   return {
     props: {
       pokemon
     },
+    revalidate: 86400
   };
 };
 
